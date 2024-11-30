@@ -1,0 +1,1 @@
+Comando para compilar o programa: g++ .\paralelo.c .\main.c -o cir ou gcc .\paralelo.c .\main.c -o cir
