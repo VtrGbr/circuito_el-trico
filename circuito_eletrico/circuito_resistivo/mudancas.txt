@@ -1,0 +1,121 @@
+Recomendações de mudanças:
+
+1. Colocar uma única função para calcular a resistência equivalente:
+    -Nesta função ela será capaz de calcular tanto para circuitos mistos.
+
+    Uma forma de implementar esta função seria usando árvore binária.
+    
+Exemplo de estrutura
+typedef struct nodo {
+    char tipo; // 'S' para série, 'P' para paralelo, 'R' para resistor
+    double valor; // Valor da resistência (apenas para resistores)
+    struct nodo *esq, *dir; // Ponteiros para sub-associações
+} Nodo;
+
+Função para criar o nó
+Nodo* criar_nodo(char tipo, double valor) {
+    Nodo* novo = (Nodo*)malloc(sizeof(Nodo));
+    if (novo != NULL) {
+        novo->tipo = tipo;
+        novo->valor = valor;
+        novo->esq = novo->dir = NULL;
+    }
+    return novo;
+}
+
+
+Função para o cálculo da resistência equivalente
+double calcular_resistencia(Nodo* nodo) {
+    if (nodo == NULL) return 0;
+
+    if (nodo->tipo == 'R') return nodo->valor;
+
+    double res_esq = calcular_resistencia(nodo->esq);
+    double res_dir = calcular_resistencia(nodo->dir);
+
+    if (nodo->tipo == 'S') {
+        return res_esq + res_dir;  // Associação em Série
+    } else if (nodo->tipo == 'P') {
+        return (res_esq * res_dir) / (res_esq + res_dir);  // Associação em Paralelo
+    }
+    return 0;
+}
+
+
+2. Implementar um sistema de leitura da entrada.
+    - Esse tipo de leitura seria por meio de uma pilha
+    - Exemplo de uma expressao de entrada: "10 S (20 P 20) S 5"
+        Onde "10" é o valor do resistor e "S" indica que ele está em série. "( 20 P 20 )" Indica que "20" está em paralelo com o outro resistor de "20".
+        Exemplo 2: (S (R 10) (P (R 20) (R 20)) (R 5)). Neste exemplo os parenteses indicam a ordem de prioridade. "R" simboliza: "O resistor R tem valor 10". 
+
+2.1 Funções para a implementação de pilha
+typedef struct pilha {
+    Nodo* nodo;
+    struct pilha* prox;
+} Pilha;
+
+Pilha* empilhar(Pilha* topo, Nodo* nodo) {
+    Pilha* novo = (Pilha*)malloc(sizeof(Pilha));
+    //Verificacao de seguranca
+    if( novo != NULL){
+
+    
+        novo->nodo = nodo;
+        novo->prox = topo;
+        return novo;
+    }else{
+        //Erro na alocacao
+        return NULL;
+    }
+}
+
+Pilha* desempilhar(Pilha** topo) {
+    if (*topo == NULL) return NULL;
+    Pilha* temp = *topo;
+    *topo = (*topo)->prox;
+    return temp;
+}
+
+    - Função para ler a expressão e construir a árvore:
+    
+    Nodo* processar_expressao(char* expressao) {
+    Pilha* pilha = NULL;
+    char* token = strtok(expressao, " ()");
+
+    while (token != NULL) {
+        if (strcmp(token, "S") == 0 || strcmp(token, "P") == 0) {
+            Nodo* nodo = criar_nodo(token[0], 0);
+            pilha = empilhar(pilha, nodo);
+        } else if (strcmp(token, "R") == 0) {
+            token = strtok(NULL, " ()");
+            double valor = atof(token);
+            Nodo* nodo = criar_nodo('R', valor);
+            pilha = empilhar(pilha, nodo);
+        } else if (strcmp(token, ")") == 0) {
+            Nodo* dir = desempilhar(&pilha)->nodo;
+            Nodo* esq = desempilhar(&pilha)->nodo;
+            Nodo* op = desempilhar(&pilha)->nodo;
+            op->esq = esq;
+            op->dir = dir;
+            pilha = empilhar(pilha, op);
+        }
+        token = strtok(NULL, " ()");
+    }
+
+    Nodo* raiz = desempilhar(&pilha)->nodo;
+    return raiz;
+    }
+
+-Uso na main
+int main() {
+    char expressao[] = "(S (R 10) (P (R 20) (R 20)) (R 5))";
+    Nodo* raiz = processar_expressao(expressao);
+    double resistencia_eq = calcular_resistencia(raiz);
+    printf("Resistência Equivalente: %.2lf ohms\n", resistencia_eq);
+
+    // Liberação de memória da árvore
+    free(raiz);
+    return 0;
+}
+
+
