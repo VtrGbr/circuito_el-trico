@@ -23,4 +23,16 @@ typedef struct fila{
     Resistor res;
     struct fila *prox;
 }Fila;
+
+//Estrutura da arvore
+typedef struct arvore{
+    Resistor res;
+    struct arvore* dir,*esq;
+}Tree;
+
+//Estrutura para a pilha
+typedef struct pilha {
+    Tree* arvore;
+    struct pilha* prox;
+} Pilha;
 #endif

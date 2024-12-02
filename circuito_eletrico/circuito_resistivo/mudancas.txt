@@ -119,3 +119,4 @@ int main() {
 }
 
 
+Observacao: A funcao para formar a arvore a partir da expressao apresenta algum erro logico, consertar!!!
