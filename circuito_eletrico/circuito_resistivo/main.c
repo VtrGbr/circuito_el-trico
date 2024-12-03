@@ -17,7 +17,7 @@ int main(){
 
     raiz = processar_expressao(expressao);
     if (raiz == NULL) { // Verificacao de seguranca
-        printf("Erro ao processar a expressão\n");
+        printf("Erro ao processar a expressao\n");
         return 1;
     }
     double res_eq = res_misto(raiz);
@@ -54,7 +54,7 @@ int main(){
 
     }
 */
-
+/*
     printf("\nQual calculo total voce deseja?\nDigite:\n 1 - Corrente;\n 2- Tensao.\n");
     scanf("%d",&opcao);
 
@@ -71,7 +71,7 @@ int main(){
         printf("Tensao total do circuito: %.2lf V.",i_total);
 
     }
-
+*/
     imprimir_arvore(raiz, 0);
     // Liberação de memória (recomenda-se implementar uma função para isso)
     while (queue != NULL) {

@@ -120,3 +120,4 @@ int main() {
 
 
 Observacao: A funcao para formar a arvore a partir da expressao apresenta algum erro logico, consertar!!!
+            De alguma forma, pilha está sendo retornada como nula.

@@ -41,6 +41,8 @@ double res_misto(Tree* arvore){
     double resist_esq = res_misto(arvore->esq);
     double resist_dir = res_misto(arvore->dir);
 
+    printf("resist_esq = %.2lf resist_dir = %.2lf\n",resist_dir,resist_esq);
+
     //Espacao para adicionar o enfileirar
 
     //Verificar o tipo da associacao (serie ou paralelo)
@@ -91,64 +93,72 @@ Pilha* pop(Pilha** topo){
 //Funcao responsavel por ler e construir a arvore
 //Caso esta funcao apresente erro ela retornarah NULL
 //Esta funcao irah analisar a expressao e no final retornah um ponteiro para o endereco da raiz da arvore
-Tree* processar_expressao(char* expressao){
+Tree* processar_expressao(char* expressao) {
     Pilha* stack = NULL;
     char* palavra = strtok(expressao, " ()");
 
-    while( palavra != NULL){
-        if( strcmp( palavra, "S") == 0 || strcmp(palavra, "P") == 0){
-            Tree* raiz = criar_tree(0,palavra[0]);
-            //Verificacao de seguranca
-            if( raiz != NULL){
-                stack = push(stack,raiz);
-            }else{
-                printf("Erro na alocacao da raiz, funcao processar_expressao");
+    while (palavra != NULL) {
+        if (strcmp(palavra, "S") == 0 || strcmp(palavra, "P") == 0) {
+            Tree* raiz = criar_tree(0, palavra[0]);
+            if (raiz != NULL) {
+                stack = push(stack, raiz);
+            } else {
+                printf("Erro na alocação da raiz, função processar_expressao\n");
                 return NULL;
             }
-        }else if( strcmp(palavra, "R") == 0){
+        } else if (strcmp(palavra, "R") == 0) {
             palavra = strtok(NULL, " ()");
             double valor = atof(palavra);
             Tree* raiz = criar_tree(valor, 'R');
-            //Verificacao de seguranca
-            if( raiz != NULL){
-                stack = push(stack,raiz);
-            }else{
-                printf("Erro na alocacao da raiz, funcao processar_expressao");
+            if (raiz != NULL) {
+                stack = push(stack, raiz);
+            } else {
+                printf("Erro na alocação da raiz, função processar_expressao\n");
                 return NULL;
             }
-        }else if( strcmp(palavra, ")") == 0){
-            Pilha* dir_node = pop(&stack);
-            Pilha* esq_node = pop(&stack);
-            Pilha* op_node = pop(&stack);
+        } else if (strcmp(palavra, ")") == 0) {
+            // Desempilha os dois operandos e o operador
+            Pilha* dirPilha = pop(&stack);
+            Pilha* esqPilha = pop(&stack);
+            Pilha* opPilha = pop(&stack);
 
-            if (dir_node == NULL || esq_node == NULL || op_node == NULL) {
+            if (dirPilha == NULL || esqPilha == NULL || opPilha == NULL) {
                 printf("Erro ao processar a expressão: pilha vazia\n");
                 return NULL;
             }
 
-            Tree* op = op_node->arvore;
-            op->esq = esq_node->arvore;
-            op->dir = dir_node->arvore;
+            Tree* dir = dirPilha->arvore;
+            Tree* esq = esqPilha->arvore;
+            Tree* operacao = opPilha->arvore;
 
-            free(dir_node);
-            free(esq_node);
-            free(op_node);
+            operacao->esq = esq;
+            operacao->dir = dir;
 
-            stack = push(stack, op);
+            // Libera memória dos nós da pilha
+            free(dirPilha);
+            free(esqPilha);
+            free(opPilha);
+
+            // Empilha novamente a subárvore resultante
+            stack = push(stack, operacao);
         }
 
         palavra = strtok(NULL, " ()");
     }
-    /*
-    if( stack == NULL){
-        printf("Erro: Expressão malformada\n");
+
+    if (stack == NULL || stack->prox != NULL) {
+        printf("Erro: Expressao malformada\n");
         return NULL;
     }
-*/
-    Tree* raiz = pop(&stack)->arvore;
+
+    // Retorna a raiz da árvore
+    Pilha* final = pop(&stack);
+    Tree* raiz = final->arvore;
+    free(final);
 
     return raiz;
 }
+
 
 //Funcao para liberar a memoria alocada da arvore
 void liberar_arvore(Tree* raiz) {
@@ -160,14 +170,7 @@ void liberar_arvore(Tree* raiz) {
 
 
 void imprimir_arvore(Tree* arvore, int nivel) {
-    if (arvore == NULL) return;
-
-    for (int i = 0; i < nivel; i++) printf("  ");
-    if (arvore->res.tipo == 'R') {
-        printf("[R: %.2lf ohms]\n", arvore->res.valor);
-    } else {
-        printf("[%c]\n", arvore->res.tipo);
-    }
-    imprimir_arvore(arvore->esq, nivel + 1);
-    imprimir_arvore(arvore->dir, nivel + 1);
+    printf("Valor: %.2lf tipo: %c",arvore->res.valor,arvore->res.tipo);
+    imprimir_arvore(arvore->esq,nivel);
+    imprimir_arvore(arvore->dir,nivel);
 }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <complex.h> // Para uso dos numeros complexos
 
 /*
 Arquivo responsavel pelas estruturas do programa
